@@ -276,7 +276,7 @@ function buildTraces() {
             customdata: nodes.map((n) => n),
             hoverinfo: 'none',
             marker: {
-                size: 2,
+                size: 1.5,
                 color: state[type].colors,
                 symbol: 'circle',
             },
