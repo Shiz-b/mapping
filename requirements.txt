@@ -1,0 +1,7 @@
+httpx
+beautifulsoup4
+sentence-transformers
+umap-learn
+numpy
+tqdm
+scikit-learn
