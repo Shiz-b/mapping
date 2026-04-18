@@ -1,4 +1,5 @@
 import argparse
+import collections
 import json
 import os
 import time
@@ -56,30 +57,59 @@ def normalize_text(text: str) -> str:
 
 def dedupe_nodes(nodes: List[Dict[str, Any]], node_type: str) -> List[Dict[str, Any]]:
     deduped: List[Dict[str, Any]] = []
-    seen: Set[str] = set()
+    seen_urls: Set[str] = set()
     for node in nodes:
         if node.get("type") != node_type:
             continue
         url_key = normalize_text(node.get("url", "")).lower()
-        title_key = normalize_text(node.get("title", "")).lower()
-        key = url_key or f"title::{title_key}"
-        if not key:
+        if not url_key:
+            # Keep nodes without URLs instead of collapsing by title.
+            deduped.append(node)
             continue
-        if key in seen:
+        if url_key in seen_urls:
             continue
-        seen.add(key)
+        seen_urls.add(url_key)
         deduped.append(node)
     return deduped
 
 
+def request_with_retries(
+    client: httpx.Client,
+    method: str,
+    url: str,
+    *,
+    max_retries: int = 4,
+    retry_delay_s: float = 1.0,
+    **kwargs: Any,
+) -> httpx.Response:
+    for attempt in range(max_retries + 1):
+        response = client.request(method, url, **kwargs)
+        if response.status_code < 400:
+            return response
+
+        is_retryable = response.status_code in {429, 500, 502, 503, 504}
+        if not is_retryable or attempt >= max_retries:
+            response.raise_for_status()
+
+        retry_after = response.headers.get("Retry-After")
+        if retry_after and retry_after.isdigit():
+            wait_s = float(retry_after)
+        else:
+            wait_s = min(30.0, retry_delay_s * (2 ** attempt))
+        time.sleep(wait_s)
+    raise RuntimeError(f"Retries exhausted for {method} {url}")
+
+
 def fetch_research_nodes(client: httpx.Client, needed: int) -> List[Dict[str, Any]]:
     per_page = 200
-    max_page = needed // per_page
+    max_page = max(1, (needed + per_page - 1) // per_page)
     collected: List[Dict[str, Any]] = []
     cursor = "*"
     pages = 0
     while len(collected) < needed and pages < max_page:
-        response = client.get(
+        response = request_with_retries(
+            client,
+            "GET",
             "https://api.openalex.org/works",
             params={
                 "search": "artificial intelligence",
@@ -90,7 +120,6 @@ def fetch_research_nodes(client: httpx.Client, needed: int) -> List[Dict[str, An
             },
             timeout=30.0,
         )
-        response.raise_for_status()
         payload = response.json()
         results = payload.get("results", [])
         for work in results:
@@ -235,8 +264,6 @@ def fetch_tool_nodes_taaft(client: httpx.Client, needed: int) -> List[Dict[str, 
             resp = client.get(url, headers=browser_headers, timeout=30.0)
             resp.raise_for_status()
             soup = BeautifulSoup(resp.text, "html.parser")
-
-            # BUG FIX 1: BeautifulSoup requires attrs= dict for non-standard attributes
             og_title = soup.find("meta", attrs={"property": "og:title"})
             og_description = soup.find("meta", attrs={"property": "og:description"})
             og_image = soup.find("meta", attrs={"property": "og:image"})
@@ -246,7 +273,6 @@ def fetch_tool_nodes_taaft(client: httpx.Client, needed: int) -> List[Dict[str, 
             image = normalize_text(og_image["content"]) if og_image and og_image.get("content") else ""
 
             if not title or not description:
-                # BUG FIX 2: Log the failure instead of silently discarding it
                 print(f"  [taaft] skipped {url} — missing OG title or description")
                 return
 
@@ -261,9 +287,6 @@ def fetch_tool_nodes_taaft(client: httpx.Client, needed: int) -> List[Dict[str, 
         except Exception as e:
             print(f"  [taaft] error fetching {url}: {e}")
 
-    # BUG FIX 3: TAAFT's listing page uses /ais/ but the link selector was wrong.
-    # Their actual AI tool cards use a[href] links that contain '/ai/' in the path.
-    # We also try multiple plausible selectors and fall back gracefully.
     LINK_SELECTORS = [
         "a.ai_link",           # most specific — their current class name
         "h2 a[href*='/ai/']",  # heading links to tool pages
@@ -347,6 +370,7 @@ def fetch_tool_nodes_taaft(client: httpx.Client, needed: int) -> List[Dict[str, 
 
 def fetch_tool_nodes(client: httpx.Client, needed: int) -> List[Dict[str, Any]]:
     primary = fetch_tool_nodes_producthunt(client, needed)
+    primary = dedupe_nodes(primary, "tool")
     if len(primary) >= needed:
         return primary[:needed]
     remaining = needed - len(primary)
@@ -389,8 +413,24 @@ def fetch_technical_nodes_github_api(client: httpx.Client, needed: int) -> List[
                 },
                 timeout=30.0,
             )
-            if response.status_code == 403 and "rate limit" in response.text.lower():
-                print("Warning: GitHub API rate limit reached, stopping API fetch early.")
+            if response.status_code in {500, 502, 503, 504, 429}:
+                response = request_with_retries(
+                    client,
+                    "GET",
+                    "https://api.github.com/search/repositories",
+                    params={
+                        "q": f"topic:machine-learning topic:artificial-intelligence {bucket}",
+                        "sort": "stars",
+                        "order": "desc",
+                        "per_page": per_page,
+                        "page": page,
+                    },
+                    timeout=30.0,
+                )
+            remaining = response.headers.get("X-RateLimit-Remaining")
+            if response.status_code in {403, 429} and remaining == "0":
+                reset_at = response.headers.get("X-RateLimit-Reset", "unknown")
+                print(f"Warning: GitHub API rate limit reached (reset: {reset_at}), stopping API fetch early.")
                 return collected[:needed]
             response.raise_for_status()
             payload = response.json()
@@ -470,6 +510,7 @@ def fetch_technical_nodes_github_topics(client: httpx.Client, needed: int) -> Li
 
 def fetch_technical_nodes(client: httpx.Client, needed: int) -> List[Dict[str, Any]]:
     primary = fetch_technical_nodes_github_api(client, needed)
+    primary = dedupe_nodes(primary, "technical")
     if len(primary) >= needed:
         return primary[:needed]
     remaining = needed - len(primary)
@@ -517,7 +558,8 @@ def main() -> None:
     args = parser.parse_args()
 
     selected_types = set(args.types or ["research", "tool", "technical"])
-    existing_nodes = [] if (args.force and not args.types) else load_existing_nodes()
+    force_all_types = args.force and not args.types
+    existing_nodes = [] if force_all_types else load_existing_nodes()
 
     existing_by_type = {
         "research": [n for n in existing_nodes if n.get("type") == "research"],
@@ -539,7 +581,7 @@ def main() -> None:
             if source_type not in selected_types:
                 continue
             current_count = len(existing_by_type[source_type])
-            force_this_type = args.force and (not args.types or source_type in selected_types)
+            force_this_type = args.force and (force_all_types or source_type in selected_types)
             if not force_this_type and current_count >= TARGET_PER_TYPE:
                 continue
             needed = TARGET_PER_TYPE if force_this_type else max(0, TARGET_PER_TYPE - current_count)
@@ -557,12 +599,15 @@ def main() -> None:
             except Exception as exc:
                 print(f"Warning: failed fetching {source_type}: {exc}")
             finally:
-                merged_partial = (
-                    existing_by_type["research"]
-                    + existing_by_type["tool"]
-                    + existing_by_type["technical"]
-                )
-                write_nodes(assign_ids_and_raw_text(merged_partial))
+                try:
+                    merged_partial = (
+                        existing_by_type["research"]
+                        + existing_by_type["tool"]
+                        + existing_by_type["technical"]
+                    )
+                    write_nodes(assign_ids_and_raw_text(merged_partial))
+                except Exception as write_exc:
+                    print(f"Warning: failed writing partial nodes after {source_type}: {write_exc}")
 
     final_nodes = assign_ids_and_raw_text(
         existing_by_type["research"][:TARGET_PER_TYPE]
@@ -571,9 +616,10 @@ def main() -> None:
     )
     write_nodes(final_nodes)
 
-    research_count = count_by_type(final_nodes, "research")
-    tool_count = count_by_type(final_nodes, "tool")
-    technical_count = count_by_type(final_nodes, "technical")
+    counts = collections.Counter(node.get("type") for node in final_nodes)
+    research_count = counts.get("research", 0)
+    tool_count = counts.get("tool", 0)
+    technical_count = counts.get("technical", 0)
     total_count = len(final_nodes)
     print(
         f"Wrote {research_count} research, {tool_count} tool, {technical_count} technical nodes (total: {total_count})"
