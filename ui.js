@@ -24,11 +24,103 @@ const tooltipEl = document.getElementById('tooltip');
 const statsEl = document.getElementById('stats');
 let pinnedNodeId = null;
 let searchRequestId = 0;
+let allNodes = [];
+let searchInput;
+let connectionEl;
+let toastHideTimer;
+let toastFadeTimer;
 function injectStyles() {
     const style = document.createElement('style');
     style.textContent = `
-    #controls, #tooltip, #stats, .kg-pill, .kg-input-wrap {
+    #controls, #tooltip, #stats, .kg-pill, .kg-input-wrap, #kg-connection, #kg-new-toast {
       font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    #kg-controls-header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin: -4px 0 8px 0;
+    }
+
+    #kg-connection {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.45);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      
+      /* POSITIONING TWEAK */
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100; /* Ensure it stays above the plot */
+    }
+
+    #kg-connection .kg-conn-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    #kg-connection.kg-conn-live .kg-conn-dot {
+      background: #2DD4A0;
+      animation: kg-conn-pulse 1.5s ease-in-out infinite;
+    }
+
+    #kg-connection.kg-conn-live .kg-conn-label {
+      color: rgba(255,255,255,0.55);
+    }
+
+    #kg-connection.kg-conn-reconnecting .kg-conn-dot {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-sizing: border-box;
+    }
+
+    #kg-connection.kg-conn-reconnecting .kg-conn-label {
+      color: rgba(255,255,255,0.35);
+    }
+
+    @keyframes kg-conn-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    #kg-new-toast {
+      position: fixed;
+      right: 20px;
+      bottom: 56px;
+      z-index: 20;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-top: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.55);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: 0 0 0 0.5px rgba(255,255,255,0.05) inset, 0 8px 32px rgba(0,0,0,0.6);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 400ms ease;
+    }
+
+    #kg-new-toast.kg-toast-visible {
+      opacity: 1;
     }
 
     .kg-section-title {
@@ -210,6 +302,11 @@ function injectStyles() {
     document.head.appendChild(style);
 }
 function buildControls() {
+    connectionEl = document.createElement('div');
+    connectionEl.id = 'kg-connection';
+    connectionEl.className = 'kg-conn-reconnecting';
+    connectionEl.innerHTML = '<span class="kg-conn-dot" aria-hidden="true"></span><span class="kg-conn-label">RECONNECTING</span>';
+    document.body.appendChild(connectionEl);
     const searchSection = document.createElement('div');
     const searchTitle = document.createElement('div');
     searchTitle.className = 'kg-section-title';
@@ -247,13 +344,114 @@ function buildControls() {
     controlsEl.appendChild(searchSection);
     controlsEl.appendChild(divider);
     controlsEl.appendChild(filterSection);
-    return { search, searchStatus, pills };
+    return { search, searchStatus, pills, connection: connectionEl };
 }
 function groupNodes(nodes) {
     TYPE_ORDER.forEach((type) => {
         state[type].nodes = nodes.filter((n) => n.type === type);
         state[type].colors = new Array(state[type].nodes.length).fill(withAlpha(TYPE_COLOR[type], BASE_OPACITY));
     });
+}
+function colorForNodeSearch(node, query, type) {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+        return withAlpha(TYPE_COLOR[type], BASE_OPACITY);
+    }
+    const haystack = `${node.title} ${node.description}`.toLowerCase();
+    const isMatch = haystack.includes(q);
+    return isMatch
+        ? withAlpha(SEARCH_MATCH_COLOR, BASE_OPACITY)
+        : withAlpha(TYPE_COLOR[type], FADED_OPACITY);
+}
+function updateConnectionIndicator(status) {
+    if (!connectionEl) {
+        return;
+    }
+    if (status === 'live') {
+        connectionEl.className = 'kg-conn-live';
+        connectionEl.innerHTML =
+            '<span class="kg-conn-dot" aria-hidden="true"></span><span class="kg-conn-label">LIVE</span>';
+        return;
+    }
+    connectionEl.className = 'kg-conn-reconnecting';
+    connectionEl.innerHTML =
+        '<span class="kg-conn-dot" aria-hidden="true"></span><span class="kg-conn-label">RECONNECTING</span>';
+}
+function showNewNodesToast(count) {
+    let el = document.getElementById('kg-new-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'kg-new-toast';
+        document.body.appendChild(el);
+    }
+    el.textContent = `+ ${count} NEW NODES`;
+    if (toastHideTimer !== undefined) {
+        window.clearTimeout(toastHideTimer);
+    }
+    if (toastFadeTimer !== undefined) {
+        window.clearTimeout(toastFadeTimer);
+    }
+    el.classList.remove('kg-toast-visible');
+    void el.offsetWidth;
+    el.classList.add('kg-toast-visible');
+    toastHideTimer = window.setTimeout(() => {
+        el?.classList.remove('kg-toast-visible');
+        toastFadeTimer = window.setTimeout(() => {
+            if (el) {
+                el.textContent = '';
+            }
+        }, 450);
+    }, 3000);
+}
+function handleNewNodes(newNodes) {
+    if (newNodes.length === 0) {
+        return;
+    }
+    allNodes.push(...newNodes);
+    const q = searchInput.value;
+    const buckets = {
+        research: [],
+        tool: [],
+        technical: [],
+    };
+    for (const n of newNodes) {
+        buckets[n.type].push(n);
+    }
+    TYPE_ORDER.forEach((type, traceIndex) => {
+        const batch = buckets[type];
+        if (batch.length === 0) {
+            return;
+        }
+        state[type].nodes.push(...batch);
+        const colors = batch.map((node) => colorForNodeSearch(node, q, type));
+        state[type].colors.push(...colors);
+        Plotly.extendTraces(plotEl, {
+            x: [batch.map((n) => n.coords.x)],
+            y: [batch.map((n) => n.coords.y)],
+            z: [batch.map((n) => n.coords.z)],
+            text: [batch.map((n) => n.title)],
+            customdata: [batch],
+            'marker.color': [colors],
+        }, [traceIndex]);
+    });
+    updateStats();
+    showNewNodesToast(newNodes.length);
+}
+function connectLiveStream() {
+    const evtSource = new EventSource('/stream');
+    evtSource.addEventListener('nodes_added', (e) => {
+        const newNodes = JSON.parse(e.data);
+        handleNewNodes(newNodes);
+    });
+    evtSource.addEventListener('heartbeat', () => {
+        updateConnectionIndicator('live');
+    });
+    evtSource.onerror = () => {
+        updateConnectionIndicator('reconnecting');
+    };
+    evtSource.onopen = () => {
+        updateConnectionIndicator('live');
+    };
 }
 function withAlpha(hexColor, alpha) {
     const rgb = hexColor
@@ -382,17 +580,20 @@ function clearPinnedTooltip() {
 async function init() {
     injectStyles();
     const { search, searchStatus, pills } = buildControls();
+    searchInput = search;
     const response = await fetch('./data/nodes.json');
     if (!response.ok) {
         throw new Error(`Failed to load data/nodes.json: ${response.status}`);
     }
     const nodes = (await response.json());
+    allNodes = [...nodes];
     groupNodes(nodes);
     await Plotly.newPlot(plotEl, buildTraces(), layoutPlot(), {
         displayModeBar: false,
         responsive: true,
     });
     updateStats();
+    connectLiveStream();
     search.addEventListener('input', () => {
         const currentRequestId = ++searchRequestId;
         searchStatus.textContent = 'Searching...';

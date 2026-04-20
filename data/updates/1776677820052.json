@@ -1,0 +1,155 @@
+[
+  {
+    "id": "research_1569",
+    "type": "research",
+    "title": "NUISS: A User-Centered Prototype for International Student Administrative Support",
+    "description": "This study applies a streamlined User-Centered Design (UCD) approach, enhanced with AI elements, to address common administrative challenges faced by international students, such as information fragmentation and unclear processes. Using National University (NU) as a case study, the research followed core UCD stages to develop the prototype of the NU International Student Services (NUISS). These stages included task analysis informed by user stories, persona development, prototype design, and a heuristic evaluation. The high-fidelity prototype integrates three key modules-Visa Services, Certification, and Paymentwith an AI-powered assistant for proactive, personalized support. The structure is designed to enhance accessibility and minimize cognitive load. An evaluation that centered on \"consistency and standards\" uncovered major interface problems; this led to design refinements that boosted visual clarity and balance in a significant way. The final prototype shows that applying UCD principles in a focused way, combined with AI enhancements, can create efficient and user-friendly administrative experiences, and it offers a replicable model for similar educational contexts.",
+    "url": "https://pub.respai.de/articles/1-1/10jhuang.html",
+    "raw_text": "NUISS: A User-Centered Prototype for International Student Administrative Support. This study applies a streamlined User-Centered Design (UCD) approach, enhanced with AI elements, to address common administrative challenges faced by international students, such as information fragmentation and unclear processes. Using National University (NU) as a case study, the research followed core UCD stages to develop the prototype of the NU International Student Services (NUISS). These stages included task analysis informed by user stories, persona development, prototype design, and a heuristic evaluation. The high-fidelity prototype integrates three key modules-Visa Services, Certification, and Paymentwith an AI-powered assistant for proactive, personalized support. The structure is designed to enhance accessibility and minimize cognitive load. An evaluation that centered on \"consistency and standards\" uncovered major interface problems; this led to design refinements that boosted visual clarity and balance in a significant way. The final prototype shows that applying UCD principles in a focused way, combined with AI enhancements, can create efficient and user-friendly administrative experiences, and it offers a replicable model for similar educational contexts.",
+    "coords": {
+      "x": -0.50389,
+      "y": 0.06323,
+      "z": 0.94604
+    }
+  },
+  {
+    "id": "technical_1013",
+    "type": "technical",
+    "title": "Russel63/Russel63",
+    "description": "LLM & RAG Developer | Building AI-driven solutions with Python 🤖",
+    "url": "https://github.com/Russel63/Russel63",
+    "raw_text": "Russel63/Russel63. LLM & RAG Developer | Building AI-driven solutions with Python 🤖",
+    "image": "https://avatars.githubusercontent.com/u/47077437?v=4",
+    "coords": {
+      "x": 0.68964,
+      "y": -0.40525,
+      "z": 0.12393
+    }
+  },
+  {
+    "id": "technical_1014",
+    "type": "technical",
+    "title": "IlievskiV/IlievskiV.github.io",
+    "description": "iSquared: a place for explainable science",
+    "url": "https://github.com/IlievskiV/IlievskiV.github.io",
+    "raw_text": "IlievskiV/IlievskiV.github.io. iSquared: a place for explainable science",
+    "image": "https://avatars.githubusercontent.com/u/4522582?v=4",
+    "coords": {
+      "x": 0.63157,
+      "y": -0.30868,
+      "z": 0.12956
+    }
+  },
+  {
+    "id": "technical_1015",
+    "type": "technical",
+    "title": "jbogocz/awesome-automated-ai",
+    "description": "A curated list of 250+ tools for Automated AI/ML - from hyperparameter optimization to autonomous AI agents.",
+    "url": "https://github.com/jbogocz/awesome-automated-ai",
+    "raw_text": "jbogocz/awesome-automated-ai. A curated list of 250+ tools for Automated AI/ML - from hyperparameter optimization to autonomous AI agents.",
+    "image": "https://avatars.githubusercontent.com/u/56686258?v=4",
+    "coords": {
+      "x": 0.36163,
+      "y": -0.19069,
+      "z": -0.05231
+    }
+  },
+  {
+    "id": "technical_1016",
+    "type": "technical",
+    "title": "Yegor-men/tracetorch",
+    "description": "A strict, ergonomic, and powerful library for SNNs, RNNs and SSMs in PyTorch.",
+    "url": "https://github.com/Yegor-men/tracetorch",
+    "raw_text": "Yegor-men/tracetorch. A strict, ergonomic, and powerful library for SNNs, RNNs and SSMs in PyTorch.",
+    "image": "https://avatars.githubusercontent.com/u/130529095?v=4",
+    "coords": {
+      "x": 0.13665,
+      "y": -0.33679,
+      "z": -0.55865
+    }
+  },
+  {
+    "id": "technical_1017",
+    "type": "technical",
+    "title": "MatthewK78/Rose",
+    "description": "🌹 Rose: Range-Of-Slice Equilibration PyTorch optimizer. Stateless optimization through range-normalized gradient updates.",
+    "url": "https://github.com/MatthewK78/Rose",
+    "raw_text": "MatthewK78/Rose. 🌹 Rose: Range-Of-Slice Equilibration PyTorch optimizer. Stateless optimization through range-normalized gradient updates.",
+    "image": "https://avatars.githubusercontent.com/u/29156922?v=4",
+    "coords": {
+      "x": 0.08632,
+      "y": -0.1684,
+      "z": -0.44271
+    }
+  },
+  {
+    "id": "technical_1018",
+    "type": "technical",
+    "title": "Feefgganapt/Deep-Live-Cam-Multi-Camera-Object-Tracking-Webui",
+    "description": "Uses deepfake tech to bypass ID verification and 2FA by simulating a user’s face in real time during live webcam checks, tricking biometric systems into granting unauthorized access through realistic facial mimicry.",
+    "url": "https://github.com/Feefgganapt/Deep-Live-Cam-Multi-Camera-Object-Tracking-Webui",
+    "raw_text": "Feefgganapt/Deep-Live-Cam-Multi-Camera-Object-Tracking-Webui. Uses deepfake tech to bypass ID verification and 2FA by simulating a user’s face in real time during live webcam checks, tricking biometric systems into granting unauthorized access through realistic facial mimicry.",
+    "image": "https://avatars.githubusercontent.com/u/247464124?v=4",
+    "coords": {
+      "x": -0.42429,
+      "y": -0.19264,
+      "z": -0.52755
+    }
+  },
+  {
+    "id": "technical_1019",
+    "type": "technical",
+    "title": "VIAME/VIAME",
+    "description": "Video and Image Analytics for Multiple Environments",
+    "url": "https://github.com/VIAME/VIAME",
+    "raw_text": "VIAME/VIAME. Video and Image Analytics for Multiple Environments",
+    "image": "https://avatars.githubusercontent.com/u/48599248?v=4",
+    "coords": {
+      "x": 0.00077,
+      "y": -0.45734,
+      "z": -0.27564
+    }
+  },
+  {
+    "id": "technical_1020",
+    "type": "technical",
+    "title": "ZenAlexa/agi-brief-history",
+    "description": "AGI简史 — 持续更新的 AGI 知识体系 | A Brief History of AGI: books, knowledge base, and ecosystem tracking for the open-source LLM era",
+    "url": "https://github.com/ZenAlexa/agi-brief-history",
+    "raw_text": "ZenAlexa/agi-brief-history. AGI简史 — 持续更新的 AGI 知识体系 | A Brief History of AGI: books, knowledge base, and ecosystem tracking for the open-source LLM era",
+    "image": "https://avatars.githubusercontent.com/u/125807850?v=4",
+    "coords": {
+      "x": 0.62253,
+      "y": -0.40831,
+      "z": 0.00927
+    }
+  },
+  {
+    "id": "technical_1021",
+    "type": "technical",
+    "title": "BrAINLabs-Inc/official-web",
+    "description": "BrAIN Labs Inc. is a brain-inspired AI and neuroinformatics research lab focused on developing interpretable, efficient artificial intelligence systems by bridging machine learning and computational neuroscience.",
+    "url": "https://github.com/BrAINLabs-Inc/official-web",
+    "raw_text": "BrAINLabs-Inc/official-web. BrAIN Labs Inc. is a brain-inspired AI and neuroinformatics research lab focused on developing interpretable, efficient artificial intelligence systems by bridging machine learning and computational neuroscience.",
+    "image": "https://avatars.githubusercontent.com/u/182912316?v=4",
+    "coords": {
+      "x": -0.17898,
+      "y": 0.09404,
+      "z": 0.25157
+    }
+  },
+  {
+    "id": "technical_1022",
+    "type": "technical",
+    "title": "andandandand/practical-computer-vision",
+    "description": "Practical Computer Vision Bootcamp with notebooks, quizzes, and videos",
+    "url": "https://github.com/andandandand/practical-computer-vision",
+    "raw_text": "andandandand/practical-computer-vision. Practical Computer Vision Bootcamp with notebooks, quizzes, and videos",
+    "image": "https://avatars.githubusercontent.com/u/1021023?v=4",
+    "coords": {
+      "x": -0.04523,
+      "y": -0.43656,
+      "z": -0.35907
+    }
+  }
+]
