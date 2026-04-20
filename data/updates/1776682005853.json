@@ -1,0 +1,30 @@
+[
+  {
+    "id": "technical_1027",
+    "type": "technical",
+    "title": "FreshLend/Petya_Ai",
+    "description": "Petya_Ai — Умный Discord бот с экономикой",
+    "url": "https://github.com/FreshLend/Petya_Ai",
+    "raw_text": "FreshLend/Petya_Ai. Petya_Ai — Умный Discord бот с экономикой",
+    "image": "https://avatars.githubusercontent.com/u/142780717?v=4",
+    "coords": {
+      "x": 0.49389,
+      "y": -0.92195,
+      "z": -0.34226
+    }
+  },
+  {
+    "id": "technical_1028",
+    "type": "technical",
+    "title": "Basha206/Lumina-mGPT-2.0",
+    "description": "Lumina-mGPT 2.0: Stand-alone Autoregressive Image Modeling",
+    "url": "https://github.com/Basha206/Lumina-mGPT-2.0",
+    "raw_text": "Basha206/Lumina-mGPT-2.0. Lumina-mGPT 2.0: Stand-alone Autoregressive Image Modeling",
+    "image": "https://avatars.githubusercontent.com/u/200042022?v=4",
+    "coords": {
+      "x": 0.17143,
+      "y": -0.53296,
+      "z": -0.09642
+    }
+  }
+]

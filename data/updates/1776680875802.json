@@ -1,0 +1,44 @@
+[
+  {
+    "id": "technical_1024",
+    "type": "technical",
+    "title": "morinim/ultra",
+    "description": "Framework for Evolutionary Algorithms",
+    "url": "https://github.com/morinim/ultra",
+    "raw_text": "morinim/ultra. Framework for Evolutionary Algorithms",
+    "image": "https://avatars.githubusercontent.com/u/10128372?v=4",
+    "coords": {
+      "x": -0.06812,
+      "y": 0.07691,
+      "z": 0.06031
+    }
+  },
+  {
+    "id": "technical_1025",
+    "type": "technical",
+    "title": "demml/opsml",
+    "description": "Quality Control for AI Artifact Management",
+    "url": "https://github.com/demml/opsml",
+    "raw_text": "demml/opsml. Quality Control for AI Artifact Management",
+    "image": "https://avatars.githubusercontent.com/u/156534151?v=4",
+    "coords": {
+      "x": 0.38713,
+      "y": -0.27845,
+      "z": -0.11947
+    }
+  },
+  {
+    "id": "technical_1026",
+    "type": "technical",
+    "title": "Pannavira/Stress-Detection-1DResNet-App",
+    "description": "A research-grade Android application for real-time stress detection using a Knowledge Distilled 1D-ResNet model and ONNX Runtime. Processes physiological signals (ECG/EDA) locally on edge devices",
+    "url": "https://github.com/Pannavira/Stress-Detection-1DResNet-App",
+    "raw_text": "Pannavira/Stress-Detection-1DResNet-App. A research-grade Android application for real-time stress detection using a Knowledge Distilled 1D-ResNet model and ONNX Runtime. Processes physiological signals (ECG/EDA) locally on edge devices",
+    "image": "https://avatars.githubusercontent.com/u/158441276?v=4",
+    "coords": {
+      "x": -0.35541,
+      "y": 0.58763,
+      "z": 0.26256
+    }
+  }
+]
