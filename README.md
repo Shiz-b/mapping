@@ -1,9 +1,6 @@
 A visual map of AI, specifically of research, tools (commercial/practical) and technical code in the space.
 
-<video width="600" controls>
-  <source src="map_demo.mov" type="video/mov">
-  Your browser does not support the video tag.
-</video>
+![Preview of the knowledge map](preview.png)
 
 ## How do I launch this awesome, cool interface?
 
